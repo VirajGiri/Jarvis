@@ -1,4 +1,4 @@
-import { AgentRegistry, InMemoryEventBus, Orchestrator, PriorityTaskQueue, Supervisor } from "@jarvis/core";
+import { AgentRegistry, InMemoryEventBus, InMemoryTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor } from "@jarvis/core";
 
 export interface RuntimeHost {
   eventBus: InMemoryEventBus;
@@ -6,6 +6,8 @@ export interface RuntimeHost {
   registry: AgentRegistry;
   orchestrator: Orchestrator;
   supervisor: Supervisor;
+  taskStore: InMemoryTaskStore;
+  worker: RuntimeWorker;
 }
 
 export function createRuntime(): RuntimeHost {
@@ -14,23 +16,27 @@ export function createRuntime(): RuntimeHost {
   const registry = new AgentRegistry();
   const orchestrator = new Orchestrator(registry, queue);
   const supervisor = new Supervisor();
+  const taskStore = new InMemoryTaskStore();
+  const worker = new RuntimeWorker(orchestrator, taskStore);
 
-  return { eventBus, queue, registry, orchestrator, supervisor };
+  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker };
 }
 
 export async function startRuntime(runtime: RuntimeHost): Promise<void> {
   await runtime.registry.startAll();
   await runtime.supervisor.startAll();
+  runtime.worker.start();
 }
 
 export async function stopRuntime(runtime: RuntimeHost): Promise<void> {
+  await runtime.worker.stop();
   await runtime.supervisor.stopAll();
   await runtime.registry.stopAll();
 }
 
 export function getRuntimeStatus(runtime: RuntimeHost) {
   return {
-    state: "RUNNING" as const,
+    state: runtime.worker.isRunning() ? ("RUNNING" as const) : ("STOPPED" as const),
     activeTasks: 0,
     queuedTasks: runtime.orchestrator.queueSize(),
     agents: runtime.registry.statuses(),
