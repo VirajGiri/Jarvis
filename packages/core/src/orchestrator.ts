@@ -32,7 +32,7 @@ export class Orchestrator {
         error: { code: "AGENT_NOT_FOUND", message: `No agent registered for task type: ${task.type}` },
         completedAt: new Date().toISOString()
       };
-      if (this.events) await publishTaskCompleted(this.events, result);
+      if (this.events) {\n        await publishAgentStatus(this.events, agent.status());\n        await publishTaskCompleted(this.events, result);\n      }
       return result;
     }
 
