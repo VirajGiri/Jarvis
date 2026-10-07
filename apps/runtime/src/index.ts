@@ -27,9 +27,15 @@ export function createRuntime(): RuntimeHost {
   const history = new RuntimeEventHistory();
   const logger = new JsonLogger("runtime");
   const fileBridge = new RuntimeFileBridge();
+
   for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status"]) {
-    eventBus.subscribe(eventType, async (event) => {\n      await history.append(event as any);\n      await fileBridge.appendEvent(event as any);\n      await fileBridge.writeStatus(getRuntimeHealth(registry, orchestrator, worker));\n    });
+    eventBus.subscribe(eventType, async (event) => {
+      await history.append(event as any);
+      await fileBridge.appendEvent(event as any);
+      await fileBridge.writeStatus(getRuntimeHealth(registry, orchestrator, worker));
+    });
   }
+
   return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history, logger, fileBridge };
 }
 
