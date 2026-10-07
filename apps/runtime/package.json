@@ -1,0 +1,14 @@
+{
+  "name": "@jarvis/runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@jarvis/agents": "workspace:*",
+    "@jarvis/contracts": "workspace:*",
+    "@jarvis/core": "workspace:*"
+  }
+}
