@@ -5,7 +5,7 @@ export { Orchestrator } from "./orchestrator";
 export { Supervisor } from "./supervisor";
 export { DefaultPermissionPolicy, type PermissionPolicy, type ToolRequest } from "./permissions";
 export { ToolGateway, type JarvisTool } from "./tool-gateway";
-export { getSystemSnapshot, systemSnapshotTool, windowsProcessListTool, type SystemSnapshot } from "./system-tools";
+export { getSystemSnapshot, systemSnapshotTool, windowsProcessListTool, windowsDiskSnapshotTool, type SystemSnapshot } from "./system-tools";
 
 export interface EventBus {
   publish(event: unknown): Promise<void>;
