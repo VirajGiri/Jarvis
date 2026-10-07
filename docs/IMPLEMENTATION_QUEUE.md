@@ -53,7 +53,7 @@ Active engineering queue for the jarvis-foundation branch.
 - [x] Runtime integration tests
 - [x] Crash/restart recovery tests
 - [x] Structured logging
-- [ ] Configuration versioning
+- [x] Configuration versioning
 - [ ] Packaging/update pipeline
 
 ## AI
