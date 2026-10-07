@@ -1,4 +1,4 @@
-import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent, getRuntimeHealth, JsonLogger, RuntimeFileBridge } from "@jarvis/core";
+import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent, getRuntimeHealth, JsonLogger, RuntimeFileBridge, loadRuntimeConfig } from "@jarvis/core";
 import { SystemAgent } from "@jarvis/agents";
 
 export interface RuntimeHost {
@@ -15,6 +15,7 @@ export interface RuntimeHost {
 }
 
 export function createRuntime(): RuntimeHost {
+  const config = loadRuntimeConfig();
   const eventBus = new InMemoryEventBus();
   const queue = new PriorityTaskQueue();
   const registry = new AgentRegistry();
@@ -22,11 +23,11 @@ export function createRuntime(): RuntimeHost {
   const supervisor = new Supervisor();
   const systemAgent = new SystemAgent(getSystemSnapshot);
   registry.register(systemAgent.descriptor, systemAgent);
-  const taskStore = new JsonFileTaskStore(process.env.JARVIS_TASK_STORE ?? "./.jarvis/tasks.json");
-  const worker = new RuntimeWorker(orchestrator, taskStore);
+  const taskStore = new JsonFileTaskStore(config.taskStorePath);
+  const worker = new RuntimeWorker(orchestrator, taskStore, config.workerIntervalMs);
   const history = new RuntimeEventHistory();
   const logger = new JsonLogger("runtime");
-  const fileBridge = new RuntimeFileBridge();
+  const fileBridge = new RuntimeFileBridge(config.runtimeStateDir);
 
   for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status"]) {
     eventBus.subscribe(eventType, async (event) => {
