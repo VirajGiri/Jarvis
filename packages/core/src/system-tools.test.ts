@@ -8,5 +8,6 @@ describe("system tools", () => {
     expect(snapshot.arch).toBe(process.arch);
     expect(snapshot.node).toMatch(/^v\d+/);
     expect(snapshot.uptimeSeconds).toBeGreaterThan(0);
+    expect(snapshot.loadAverage).toHaveLength(3);
   });
 });
