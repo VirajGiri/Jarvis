@@ -20,10 +20,10 @@ Active engineering queue for the jarvis-foundation branch.
 ## Windows / PC
 - [x] Read-only system snapshot
 - [x] Windows process-list tool
-- [ ] CPU/load telemetry
+- [x] CPU/load telemetry
 - [x] Disk telemetry
-- [ ] Network telemetry
-- [ ] Stable process model
+- [x] Network telemetry
+- [x] Stable process model
 - [x] Approval workflow for privileged tools
 - [x] Emergency stop / kill-switch
 
@@ -41,8 +41,8 @@ Active engineering queue for the jarvis-foundation branch.
 - [x] React command center
 - [x] Electron secure boundary
 - [x] Runtime status IPC
-- [ ] Live event stream
-- [ ] Agent detail panel
+- [x] Live event stream
+- [x] Agent detail panel
 - [ ] Task queue panel
 - [ ] Permission panel
 - [ ] System telemetry panel
@@ -51,7 +51,7 @@ Active engineering queue for the jarvis-foundation branch.
 - [x] Unit-test foundation
 - [x] GitHub Actions CI
 - [x] Runtime integration tests
-- [ ] Crash/restart recovery tests
+- [x] Crash/restart recovery tests
 - [x] Structured logging
 - [ ] Configuration versioning
 - [ ] Packaging/update pipeline
