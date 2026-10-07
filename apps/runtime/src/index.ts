@@ -15,7 +15,7 @@ export function createRuntime(): RuntimeHost {
   const eventBus = new InMemoryEventBus();
   const queue = new PriorityTaskQueue();
   const registry = new AgentRegistry();
-  const orchestrator = new Orchestrator(registry, queue);
+  const orchestrator = new Orchestrator(registry, queue, eventBus);
   const supervisor = new Supervisor();
   const systemAgent = new SystemAgent(getSystemSnapshot);
   registry.register(systemAgent.descriptor, systemAgent);
