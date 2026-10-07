@@ -8,6 +8,7 @@ export interface TaskProcessor {
 
 export class RuntimeWorker implements TaskProcessor {
   private running = false;
+  private processing = false;
   private timer?: ReturnType<typeof setTimeout>;
 
   constructor(
@@ -17,9 +18,15 @@ export class RuntimeWorker implements TaskProcessor {
   ) {}
 
   async process(): Promise<AgentResult | undefined> {
-    const result = await this.orchestrator.runNext();
-    if (result) await this.store.remove(result.taskId);
-    return result;
+    if (this.processing) return undefined;
+    this.processing = true;
+    try {
+      const result = await this.orchestrator.runNext();
+      if (result) await this.store.remove(result.taskId);
+      return result;
+    } finally {
+      this.processing = false;
+    }
   }
 
   async start(): Promise<void> {
@@ -38,9 +45,12 @@ export class RuntimeWorker implements TaskProcessor {
     return this.running;
   }
 
+  isProcessing(): boolean {
+    return this.processing;
+  }
+
   private async tick(): Promise<void> {
     if (!this.running) return;
-
     try {
       await this.process();
     } finally {
