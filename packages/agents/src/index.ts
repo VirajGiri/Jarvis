@@ -60,3 +60,38 @@ export abstract class BaseAgent implements JarvisAgent {
 
   abstract execute(task: AgentTask): Promise<AgentResult>;
 }
+
+
+export interface SystemAgentSnapshot {
+  platform: string;
+  arch: string;
+  hostname: string;
+  node: string;
+  uptimeSeconds: number;
+  memory: { totalBytes: number; freeBytes: number; usedBytes: number };
+}
+
+export class SystemAgent extends BaseAgent {
+  constructor(private readonly snapshot: () => Promise<SystemAgentSnapshot>) {
+    super("system", "System Agent", ["system.snapshot", "system.health"]);
+  }
+
+  async execute(task: AgentTask): Promise<AgentResult> {
+    this.begin(task.id);
+    this.executing();
+
+    try {
+      const output = await this.snapshot();
+      this.complete();
+      return { taskId: task.id, success: true, output, completedAt: new Date().toISOString() };
+    } catch (error) {
+      this.fail();
+      return {
+        taskId: task.id,
+        success: false,
+        error: { code: "SYSTEM_AGENT_FAILED", message: error instanceof Error ? error.message : String(error) },
+        completedAt: new Date().toISOString()
+      };
+    }
+  }
+}
