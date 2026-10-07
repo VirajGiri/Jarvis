@@ -14,6 +14,10 @@
 - Health model
 
 ## Phase 2 — Agents
+
+- [x] Base agent lifecycle SDK
+- [x] First read-only System Agent
+- [x] Runtime worker loop
 - Core
 - Research
 - Coding
