@@ -15,7 +15,7 @@ describe("runtime integration", () => {
 
     expect(result?.success).toBe(true);
     expect(result?.taskId).toBe(task.id);
-    expect(runtime.history.size()).toBeGreaterThan(0);
+    expect(runtime.history.size()).toBeGreaterThan(0);\n    expect(runtime.history.list().some((event) => event.type === "runtime.agent.status")).toBe(true);
 
     await stopRuntime(runtime);
     expect(getRuntimeStatus(runtime).state).toBe("STOPPED");
