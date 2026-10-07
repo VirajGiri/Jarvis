@@ -19,3 +19,6 @@ export interface AgentRuntime {
   start(): Promise<void>;
   stop(): Promise<void>;
 }
+
+export { InMemoryTaskStore, createTask, type TaskStore } from "./task-store";
+export { RuntimeWorker, type TaskProcessor } from "./worker-loop";
