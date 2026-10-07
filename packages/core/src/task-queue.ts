@@ -22,4 +22,10 @@ export class PriorityTaskQueue {
   size(): number {
     return this.queue.length;
   }
+
+  async drain(): Promise<AgentTask[]> {
+    const items = [...this.queue];
+    this.queue.length = 0;
+    return items;
+  }
 }
