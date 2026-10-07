@@ -2,7 +2,7 @@ import type { AgentTask, AgentResult } from "@jarvis/contracts";
 import { AgentRegistry } from "./agent-registry";
 import { PriorityTaskQueue } from "./task-queue";
 import { InMemoryEventBus } from "./event-bus";
-import { publishTaskCompleted, publishTaskSubmitted } from "./runtime-events";
+import { publishAgentStatus, publishTaskCompleted, publishTaskSubmitted } from "./runtime-events";
 
 export class Orchestrator {
   constructor(
