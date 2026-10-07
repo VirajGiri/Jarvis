@@ -29,3 +29,6 @@ export { RuntimeEventHistory } from "./runtime-history";
 
 export { JsonLogger, type Logger, type LogLevel, type LogRecord } from "./logger";
 export { getRuntimeHealth } from "./runtime-health";
+
+export { ApprovalManager, requiresApproval, type ApprovalRequest } from "./approval-manager";
+export { EmergencyStop } from "./emergency-stop";
