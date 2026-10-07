@@ -13,9 +13,9 @@ Active engineering queue for the jarvis-foundation branch.
 - [x] Runtime worker
 - [x] Durable task store
 - [x] Task lifecycle events
-- [ ] Runtime event history
-- [ ] Runtime health aggregation
-- [ ] Graceful shutdown and recovery state
+- [x] Runtime event history
+- [x] Runtime health aggregation
+- [x] Graceful shutdown and recovery state
 
 ## Windows / PC
 - [x] Read-only system snapshot
@@ -50,9 +50,9 @@ Active engineering queue for the jarvis-foundation branch.
 ## Reliability
 - [x] Unit-test foundation
 - [x] GitHub Actions CI
-- [ ] Runtime integration tests
+- [x] Runtime integration tests
 - [ ] Crash/restart recovery tests
-- [ ] Structured logging
+- [x] Structured logging
 - [ ] Configuration versioning
 - [ ] Packaging/update pipeline
 
