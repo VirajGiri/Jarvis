@@ -3,6 +3,7 @@ const path = require("node:path");
 
 const isDev = !app.isPackaged;
 let mainWindow;
+const runtimeState = { runtime: "starting", agents: 0, tasks: 0, timestamp: new Date().toISOString() };
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -26,12 +27,7 @@ function createWindow() {
   }
 }
 
-ipcMain.handle("jarvis:status", async () => ({
-  runtime: "running",
-  agents: 6,
-  tasks: 0,
-  timestamp: new Date().toISOString()
-}));
+ipcMain.handle("jarvis:status", async () => ({ ...runtimeState }));
 
 app.whenReady().then(() => {
   createWindow();
