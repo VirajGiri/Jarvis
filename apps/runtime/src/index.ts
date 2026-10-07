@@ -1,4 +1,4 @@
-import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent, getRuntimeHealth, JsonLogger } from "@jarvis/core";
+import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent, getRuntimeHealth, JsonLogger, RuntimeFileBridge } from "@jarvis/core";
 import { SystemAgent } from "@jarvis/agents";
 
 export interface RuntimeHost {
@@ -11,6 +11,7 @@ export interface RuntimeHost {
   worker: RuntimeWorker;
   history: RuntimeEventHistory;
   logger: JsonLogger;
+  fileBridge: RuntimeFileBridge;
 }
 
 export function createRuntime(): RuntimeHost {
@@ -25,10 +26,11 @@ export function createRuntime(): RuntimeHost {
   const worker = new RuntimeWorker(orchestrator, taskStore);
   const history = new RuntimeEventHistory();
   const logger = new JsonLogger("runtime");
+  const fileBridge = new RuntimeFileBridge();
   for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status"]) {
-    eventBus.subscribe(eventType, (event) => history.append(event as any));
+    eventBus.subscribe(eventType, async (event) => {\n      await history.append(event as any);\n      await fileBridge.appendEvent(event as any);\n      await fileBridge.writeStatus(getRuntimeHealth(registry, orchestrator, worker));\n    });
   }
-  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history, logger };
+  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history, logger, fileBridge };
 }
 
 export async function startRuntime(runtime: RuntimeHost): Promise<void> {
