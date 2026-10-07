@@ -15,4 +15,5 @@ process.on("SIGINT", () => void shutdown("SIGINT"));
 process.on("SIGTERM", () => void shutdown("SIGTERM"));
 
 await startRuntime(runtime);
+runtime.logger.info("JARVIS runtime started", { state: "RUNNING" });
 console.log("JARVIS runtime started");
