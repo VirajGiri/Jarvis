@@ -51,3 +51,28 @@ export const windowsProcessListTool: JarvisTool = {
     return { supported: true, csv: stdout };
   }
 };
+
+
+export interface DiskSnapshot {
+  filesystem: string;
+  sizeBytes: number;
+  freeBytes: number;
+  usedBytes: number;
+}
+
+export const windowsDiskSnapshotTool: JarvisTool = {
+  id: "windows.disk-snapshot",
+  risk: "READ",
+  async execute() {
+    if (process.platform !== "win32") {
+      return { supported: false, disks: [] };
+    }
+    const { stdout } = await execFileAsync("powershell.exe", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      "Get-PSDrive -PSProvider FileSystem | Select-Object Name,Used,Free | ConvertTo-Json -Compress"
+    ], { windowsHide: true, maxBuffer: 1024 * 1024 });
+    return { supported: true, disks: stdout };
+  }
+};
