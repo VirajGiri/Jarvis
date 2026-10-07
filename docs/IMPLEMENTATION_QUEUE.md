@@ -1,0 +1,68 @@
+# J.A.R.V.I.S. Implementation Queue
+
+Active engineering queue for the jarvis-foundation branch.
+
+## Runtime
+- [x] Event bus
+- [x] Priority task queue
+- [x] Agent registry and lifecycle
+- [x] Orchestrator
+- [x] Supervisor
+- [x] Permission policy
+- [x] Tool gateway
+- [x] Runtime worker
+- [x] Durable task store
+- [x] Task lifecycle events
+- [ ] Runtime event history
+- [ ] Runtime health aggregation
+- [ ] Graceful shutdown and recovery state
+
+## Windows / PC
+- [x] Read-only system snapshot
+- [x] Windows process-list tool
+- [ ] CPU/load telemetry
+- [ ] Disk telemetry
+- [ ] Network telemetry
+- [ ] Stable process model
+- [ ] Approval workflow for privileged tools
+- [ ] Emergency stop / kill-switch
+
+## Agents
+- [x] Base agent SDK
+- [x] System Agent
+- [ ] Research Agent
+- [ ] Coding Agent
+- [ ] Browser Agent
+- [ ] Files Agent
+- [ ] Automation Agent
+- [ ] Security Agent
+
+## Desktop
+- [x] React command center
+- [x] Electron secure boundary
+- [x] Runtime status IPC
+- [ ] Live event stream
+- [ ] Agent detail panel
+- [ ] Task queue panel
+- [ ] Permission panel
+- [ ] System telemetry panel
+
+## Reliability
+- [x] Unit-test foundation
+- [x] GitHub Actions CI
+- [ ] Runtime integration tests
+- [ ] Crash/restart recovery tests
+- [ ] Structured logging
+- [ ] Configuration versioning
+- [ ] Packaging/update pipeline
+
+## AI
+- [ ] AI provider abstraction
+- [ ] Model routing
+- [ ] Tool-call validation
+- [ ] Conversation memory
+- [ ] Long-term vector memory
+- [ ] Voice
+- [ ] Proactive scheduling
+
+Security rule: LLM output never receives unrestricted OS access. Privileged actions pass through the Tool Gateway and permission policy.
