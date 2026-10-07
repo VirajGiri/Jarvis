@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import os from "node:os";
 import type { JarvisTool } from "./tool-gateway";
 
 const execFileAsync = promisify(execFile);
@@ -14,14 +15,14 @@ export interface SystemSnapshot {
 }
 
 export async function getSystemSnapshot(): Promise<SystemSnapshot> {
-  const totalBytes = process.memoryUsage().rss;
-  const freeBytes = 0;
+  const totalBytes = os.totalmem();
+  const freeBytes = os.freemem();
   return {
     platform: process.platform,
     arch: process.arch,
     node: process.version,
-    hostname: (await import("node:os")).hostname(),
-    uptimeSeconds: (await import("node:os")).uptime(),
+    hostname: os.hostname(),
+    uptimeSeconds: os.uptime(),
     memory: { totalBytes, freeBytes, usedBytes: totalBytes - freeBytes }
   };
 }
