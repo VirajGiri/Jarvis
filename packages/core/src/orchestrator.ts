@@ -12,6 +12,10 @@ export class Orchestrator {
     await this.queue.enqueue(task);
   }
 
+  async recover(tasks: AgentTask[]): Promise<void> {
+    for (const task of tasks) await this.queue.enqueue(task);
+  }
+
   async runNext(): Promise<AgentResult | undefined> {
     const task = await this.queue.dequeue();
     if (!task) return undefined;
