@@ -16,6 +16,11 @@ export class InMemoryEventBus {
     await Promise.all([...handlers].map((handler) => handler(event)));
   }
 
+  listenerCount(type?: string): number {
+    if (type) return this.handlers.get(type)?.size ?? 0;
+    return [...this.handlers.values()].reduce((sum, set) => sum + set.size, 0);
+  }
+
   clear(): void {
     this.handlers.clear();
   }
