@@ -18,7 +18,7 @@ export function getRuntimeHealth(
 
   return {
     state,
-    activeTasks: 0,
+    activeTasks: worker.isProcessing() ? 1 : 0,
     queuedTasks: orchestrator.queueSize(),
     agents,
     updatedAt: new Date().toISOString()
