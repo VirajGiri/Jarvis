@@ -1,5 +1,6 @@
 import { AgentRegistry, InMemoryEventBus, InMemoryTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot } from "@jarvis/core";
 import { SystemAgent } from "@jarvis/agents";
+import { RuntimeEventHistory } from "@jarvis/core";
 
 export interface RuntimeHost {
   eventBus: InMemoryEventBus;
@@ -9,6 +10,7 @@ export interface RuntimeHost {
   supervisor: Supervisor;
   taskStore: InMemoryTaskStore;
   worker: RuntimeWorker;
+  history: RuntimeEventHistory;
 }
 
 export function createRuntime(): RuntimeHost {
@@ -21,8 +23,13 @@ export function createRuntime(): RuntimeHost {
   registry.register(systemAgent.descriptor, systemAgent);
   const taskStore = new InMemoryTaskStore();
   const worker = new RuntimeWorker(orchestrator, taskStore);
+  const history = new RuntimeEventHistory();
+  eventBus.subscribe("runtime.task.submitted", (event) => history.append(event as any));
+  eventBus.subscribe("runtime.task.completed", (event) => history.append(event as any));
+  eventBus.subscribe("runtime.agent.status", (event) => history.append(event as any));
+  eventBus.subscribe("runtime.status", (event) => history.append(event as any));
 
-  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker };
+  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history };
 }
 
 export async function startRuntime(runtime: RuntimeHost): Promise<void> {
