@@ -1,4 +1,4 @@
-import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent } from "@jarvis/core";
+import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent, getRuntimeHealth, JsonLogger } from "@jarvis/core";
 import { SystemAgent } from "@jarvis/agents";
 import { RuntimeEventHistory } from "@jarvis/core";
 
@@ -11,6 +11,7 @@ export interface RuntimeHost {
   taskStore: JsonFileTaskStore;
   worker: RuntimeWorker;
   history: RuntimeEventHistory;
+  logger: JsonLogger;
 }
 
 export function createRuntime(): RuntimeHost {
@@ -24,12 +25,13 @@ export function createRuntime(): RuntimeHost {
   const taskStore = new JsonFileTaskStore(process.env.JARVIS_TASK_STORE ?? "./.jarvis/tasks.json");
   const worker = new RuntimeWorker(orchestrator, taskStore);
   const history = new RuntimeEventHistory();
+  const logger = new JsonLogger("runtime");
   eventBus.subscribe("runtime.task.submitted", (event) => history.append(event as any));
   eventBus.subscribe("runtime.task.completed", (event) => history.append(event as any));
   eventBus.subscribe("runtime.agent.status", (event) => history.append(event as any));
   eventBus.subscribe("runtime.status", (event) => history.append(event as any));
 
-  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history };
+  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history, logger };
 }
 
 export async function startRuntime(runtime: RuntimeHost): Promise<void> {
@@ -49,8 +51,7 @@ export async function stopRuntime(runtime: RuntimeHost): Promise<void> {
 }
 
 export function getRuntimeStatus(runtime: RuntimeHost) {
-  return {
-    state: runtime.worker.isRunning() ? ("RUNNING" as const) : ("STOPPED" as const),
+  return getRuntimeHealth(runtime.registry, runtime.orchestrator, runtime.worker);
     activeTasks: 0,
     queuedTasks: runtime.orchestrator.queueSize(),
     agents: runtime.registry.statuses(),
