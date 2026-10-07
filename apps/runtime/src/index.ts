@@ -1,17 +1,4 @@
-import {
-  AgentRegistry,
-  InMemoryEventBus,
-  JsonFileTaskStore,
-  Orchestrator,
-  PriorityTaskQueue,
-  RuntimeWorker,
-  Supervisor,
-  getSystemSnapshot,
-  RuntimeEventHistory,
-  createRuntimeEvent,
-  getRuntimeHealth,
-  JsonLogger
-} from "@jarvis/core";
+import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent, getRuntimeHealth, JsonLogger } from "@jarvis/core";
 import { SystemAgent } from "@jarvis/agents";
 
 export interface RuntimeHost {
@@ -38,16 +25,9 @@ export function createRuntime(): RuntimeHost {
   const worker = new RuntimeWorker(orchestrator, taskStore);
   const history = new RuntimeEventHistory();
   const logger = new JsonLogger("runtime");
-
-  for (const eventType of [
-    "runtime.task.submitted",
-    "runtime.task.completed",
-    "runtime.agent.status",
-    "runtime.status"
-  ]) {
+  for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status"]) {
     eventBus.subscribe(eventType, (event) => history.append(event as any));
   }
-
   return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history, logger };
 }
 
