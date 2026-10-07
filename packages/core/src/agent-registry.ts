@@ -16,4 +16,16 @@ export class AgentRegistry {
   list(): AgentDescriptor[] {
     return [...this.agents.values()].map(({ descriptor }) => descriptor);
   }
+
+  statuses() {
+    return [...this.agents.values()].map(({ agent }) => agent.status());
+  }
+
+  async startAll(): Promise<void> {
+    for (const { agent } of this.agents.values()) await agent.start();
+  }
+
+  async stopAll(): Promise<void> {
+    for (const { agent } of this.agents.values()) await agent.stop();
+  }
 }
