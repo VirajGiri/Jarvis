@@ -1,4 +1,5 @@
-import { AgentRegistry, InMemoryEventBus, InMemoryTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor } from "@jarvis/core";
+import { AgentRegistry, InMemoryEventBus, InMemoryTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot } from "@jarvis/core";
+import { SystemAgent } from "@jarvis/agents";
 
 export interface RuntimeHost {
   eventBus: InMemoryEventBus;
@@ -16,6 +17,8 @@ export function createRuntime(): RuntimeHost {
   const registry = new AgentRegistry();
   const orchestrator = new Orchestrator(registry, queue);
   const supervisor = new Supervisor();
+  const systemAgent = new SystemAgent(getSystemSnapshot);
+  registry.register(systemAgent.descriptor, systemAgent);
   const taskStore = new InMemoryTaskStore();
   const worker = new RuntimeWorker(orchestrator, taskStore);
 
