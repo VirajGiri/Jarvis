@@ -21,11 +21,11 @@ Active engineering queue for the jarvis-foundation branch.
 - [x] Read-only system snapshot
 - [x] Windows process-list tool
 - [ ] CPU/load telemetry
-- [ ] Disk telemetry
+- [x] Disk telemetry
 - [ ] Network telemetry
 - [ ] Stable process model
-- [ ] Approval workflow for privileged tools
-- [ ] Emergency stop / kill-switch
+- [x] Approval workflow for privileged tools
+- [x] Emergency stop / kill-switch
 
 ## Agents
 - [x] Base agent SDK
