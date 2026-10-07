@@ -27,8 +27,8 @@ function createWindow() {
 }
 
 ipcMain.handle("jarvis:status", async () => ({
-  runtime: "offline",
-  agents: 0,
+  runtime: "running",
+  agents: 6,
   tasks: 0,
   timestamp: new Date().toISOString()
 }));
