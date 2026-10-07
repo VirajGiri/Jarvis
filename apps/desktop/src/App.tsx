@@ -20,6 +20,7 @@ function CoreVisual() {
 export default function App() {
   const [runtime, setRuntime] = useState("CONNECTING");
   const [tasks, setTasks] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -32,6 +33,7 @@ export default function App() {
       if (mounted) {
         setRuntime(status.runtime.toUpperCase());
         setTasks(status.tasks);
+        setLastUpdate(status.timestamp);
       }
     };
     void refresh();
@@ -51,6 +53,6 @@ export default function App() {
     <section className="agents">{agents.map(([name,state],i)=><motion.article key={name} initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{delay:i*.08}}>
       <div className="agent-name">{name}</div><div className="agent-state">{state}</div>
     </motion.article>)}</section>
-    <footer><span>EVENT BUS: READY</span><span>TASK QUEUE: {tasks}</span><span>PC CONTROL: LOCKED</span></footer>
+    <footer><span>EVENT BUS: READY</span><span>TASK QUEUE: {tasks}</span><span>PC CONTROL: LOCKED</span><span>SYNC: {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : "WAITING"}</span></footer>
   </main>;
 }
