@@ -5,7 +5,7 @@
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
-    "dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "dev": "concurrently -k \"vite\" \"cd ../runtime && tsx src/main.ts\" \"wait-on http://localhost:5173 && electron .\"",
     "build": "tsc -b && vite build",
     "typecheck": "tsc --noEmit",
     "electron": "electron ."
