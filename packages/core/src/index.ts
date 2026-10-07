@@ -24,3 +24,5 @@ export { InMemoryTaskStore, createTask, type TaskStore } from "./task-store";
 export { RuntimeWorker, type TaskProcessor } from "./worker-loop";
 
 export { RUNTIME_EVENTS, createRuntimeEvent, publishTaskSubmitted, publishTaskCompleted, publishAgentStatus } from "./runtime-events";
+
+export { RuntimeEventHistory } from "./runtime-history";
