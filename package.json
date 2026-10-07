@@ -1,0 +1,1 @@
+{"name":"jarvis","version":"0.1.0","private":true,"description":"J.A.R.V.I.S. 24/7 multi-agent Windows AI platform","workspaces":["apps/*","packages/*"],"scripts":{"dev":"npm --workspace apps/desktop run dev","build":"npm --workspace apps/desktop run build","typecheck":"npm --workspaces run typecheck"},"engines":{"node":">=22"}}
