@@ -32,3 +32,5 @@ export { getRuntimeHealth } from "./runtime-health";
 
 export { ApprovalManager, requiresApproval, type ApprovalRequest } from "./approval-manager";
 export { EmergencyStop } from "./emergency-stop";
+
+export { RuntimeFileBridge } from "./runtime-file-bridge";
