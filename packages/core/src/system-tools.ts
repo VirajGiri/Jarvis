@@ -12,6 +12,7 @@ export interface SystemSnapshot {
   hostname: string;
   uptimeSeconds: number;
   memory: { totalBytes: number; freeBytes: number; usedBytes: number };
+  loadAverage: number[];
 }
 
 export async function getSystemSnapshot(): Promise<SystemSnapshot> {
@@ -23,7 +24,8 @@ export async function getSystemSnapshot(): Promise<SystemSnapshot> {
     node: process.version,
     hostname: os.hostname(),
     uptimeSeconds: os.uptime(),
-    memory: { totalBytes, freeBytes, usedBytes: totalBytes - freeBytes }
+    memory: { totalBytes, freeBytes, usedBytes: totalBytes - freeBytes },
+    loadAverage: os.loadavg()
   };
 }
 
