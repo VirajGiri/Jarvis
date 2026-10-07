@@ -22,8 +22,9 @@ export class RuntimeWorker implements TaskProcessor {
     return result;
   }
 
-  start(): void {
+  async start(): Promise<void> {
     if (this.running) return;
+    await this.orchestrator.recover(await this.store.list());
     this.running = true;
     void this.tick();
   }
