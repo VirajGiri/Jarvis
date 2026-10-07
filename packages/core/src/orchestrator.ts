@@ -32,14 +32,17 @@ export class Orchestrator {
         error: { code: "AGENT_NOT_FOUND", message: `No agent registered for task type: ${task.type}` },
         completedAt: new Date().toISOString()
       };
-      if (this.events) {\n        await publishAgentStatus(this.events, agent.status());\n        await publishTaskCompleted(this.events, result);\n      }
+      if (this.events) await publishTaskCompleted(this.events, result);
       return result;
     }
 
     try {
       const output = await agent.execute(task);
       const result = { taskId: task.id, success: true, output, completedAt: new Date().toISOString() };
-      if (this.events) await publishTaskCompleted(this.events, result);
+      if (this.events) {
+        await publishAgentStatus(this.events, agent.status());
+        await publishTaskCompleted(this.events, result);
+      }
       return result;
     } catch (error) {
       const result = {
@@ -48,7 +51,10 @@ export class Orchestrator {
         error: { code: "AGENT_EXECUTION_FAILED", message: error instanceof Error ? error.message : String(error) },
         completedAt: new Date().toISOString()
       };
-      if (this.events) await publishTaskCompleted(this.events, result);
+      if (this.events) {
+        await publishAgentStatus(this.events, agent.status());
+        await publishTaskCompleted(this.events, result);
+      }
       return result;
     }
   }
