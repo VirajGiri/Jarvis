@@ -26,3 +26,6 @@ export { RuntimeWorker, type TaskProcessor } from "./worker-loop";
 export { RUNTIME_EVENTS, createRuntimeEvent, publishTaskSubmitted, publishTaskCompleted, publishAgentStatus } from "./runtime-events";
 
 export { RuntimeEventHistory } from "./runtime-history";
+
+export { JsonLogger, type Logger, type LogLevel, type LogRecord } from "./logger";
+export { getRuntimeHealth } from "./runtime-health";
