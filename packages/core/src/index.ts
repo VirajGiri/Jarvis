@@ -2,6 +2,9 @@ export { InMemoryEventBus } from "./event-bus";
 export { PriorityTaskQueue } from "./task-queue";
 export { AgentRegistry } from "./agent-registry";
 export { Orchestrator } from "./orchestrator";
+export { Supervisor } from "./supervisor";
+export { DefaultPermissionPolicy, type PermissionPolicy, type ToolRequest } from "./permissions";
+export { ToolGateway, type JarvisTool } from "./tool-gateway";
 
 export interface EventBus {
   publish(event: unknown): Promise<void>;
