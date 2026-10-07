@@ -28,7 +28,7 @@ export function createRuntime(): RuntimeHost {
 export async function startRuntime(runtime: RuntimeHost): Promise<void> {
   await runtime.registry.startAll();
   await runtime.supervisor.startAll();
-  runtime.worker.start();
+  await runtime.worker.start();
 }
 
 export async function stopRuntime(runtime: RuntimeHost): Promise<void> {
