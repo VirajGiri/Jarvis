@@ -71,7 +71,7 @@ export const windowsProcessListTool: JarvisTool = {
   risk: "READ",
   async execute() {
     if (process.platform !== "win32") return { supported: false, processes: [] };
-    const { stdout } = await execFileAsync("tasklist.exe", [" /FO CSV /NH".trim()], {
+    const { stdout } = await execFileAsync("tasklist.exe", ["/FO", "CSV", "/NH"], {
       windowsHide: true,
       maxBuffer: 4 * 1024 * 1024
     });
