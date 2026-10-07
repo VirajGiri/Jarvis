@@ -34,3 +34,5 @@ export { ApprovalManager, requiresApproval, type ApprovalRequest } from "./appro
 export { EmergencyStop } from "./emergency-stop";
 
 export { RuntimeFileBridge } from "./runtime-file-bridge";
+
+export { loadRuntimeConfig, type RuntimeConfig } from "./config";
