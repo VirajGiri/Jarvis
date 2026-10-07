@@ -27,6 +27,50 @@ export class InMemoryTaskStore implements TaskStore {
   }
 }
 
+export class JsonFileTaskStore implements TaskStore {
+  private readonly fallback = new InMemoryTaskStore();
+
+  constructor(private readonly filePath: string) {}
+
+  private async read(): Promise<AgentTask[]> {
+    try {
+      const fs = await import("node:fs/promises");
+      const raw = await fs.readFile(this.filePath, "utf8");
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed as AgentTask[] : [];
+    } catch {
+      return this.fallback.list();
+    }
+  }
+
+  private async write(tasks: AgentTask[]): Promise<void> {
+    const fs = await import("node:fs/promises");
+    const path = await import("node:path");
+    await fs.mkdir(path.dirname(this.filePath), { recursive: true });
+    await fs.writeFile(this.filePath, JSON.stringify(tasks, null, 2), "utf8");
+  }
+
+  async save(task: AgentTask): Promise<void> {
+    const tasks = await this.read();
+    const next = tasks.filter((item) => item.id !== task.id);
+    next.push(task);
+    await this.write(next);
+  }
+
+  async remove(taskId: string): Promise<void> {
+    const tasks = await this.read();
+    await this.write(tasks.filter((item) => item.id !== taskId));
+  }
+
+  async list(): Promise<AgentTask[]> {
+    return this.read();
+  }
+
+  async clear(): Promise<void> {
+    await this.write([]);
+  }
+}
+
 export function createTask(
   id: string,
   type: string,
