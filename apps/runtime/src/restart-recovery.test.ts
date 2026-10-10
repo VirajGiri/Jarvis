@@ -17,7 +17,6 @@ describe("runtime restart recovery", () => {
       await startRuntime(first);
       const task = createTask("restart-recovery-1", "system");
       await first.taskStore.save(task);
-      await first.orchestrator.submit(task);
       await stopRuntime(first);
 
       const second = createRuntime();
