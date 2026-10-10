@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 type AgentView = { agentId: string; state: string; lastTaskId?: string; updatedAt?: string };
 type RuntimeEvent = { id: string; type: string; source: string; timestamp: string; payload: Record<string, unknown> };
+type TelemetryView = { hostname: string; platform: string; uptimeSeconds: number; memory: { totalBytes: number; freeBytes: number; usedBytes: number }; loadAverage: number[] };
 const fallbackAgents = ["CORE", "RESEARCH", "CODING", "BROWSER", "SYSTEM", "SECURITY"];
 
 function CoreVisual() {
@@ -26,6 +27,7 @@ export default function App() {
   const [agents, setAgents] = useState<AgentView[]>([]);
   const [events, setEvents] = useState<RuntimeEvent[]>([]);
   const [lastUpdate, setLastUpdate] = useState("");
+  const [telemetry, setTelemetry] = useState<TelemetryView | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -36,6 +38,7 @@ export default function App() {
       setQueuedTasks(status.queuedTasks);
       setAgents(status.agents.map((agent) => ({ agentId: agent.agentId, state: agent.state, lastTaskId: agent.lastTaskId, updatedAt: agent.updatedAt })));
       setLastUpdate(status.updatedAt);
+      setTelemetry(status.telemetry ?? null);
     };
     const refresh = async () => {
       if (!window.jarvis) { setRuntime("BROWSER MODE"); return; }
@@ -68,6 +71,15 @@ export default function App() {
       <article><div className="panel-label">REGISTERED AGENTS</div><div className="metric">{agents.length}</div><div className="panel-note">Runtime registry snapshot</div></article>
       <article><div className="panel-label">PC CONTROL</div><div className="metric locked">LOCKED</div><div className="panel-note">Privileged actions disabled by default</div></article>
     </section>
+    {telemetry && <section className="telemetry-panel">
+      <div className="panel-heading"><span>SYSTEM TELEMETRY</span><span>{telemetry.hostname} · {telemetry.platform}</span></div>
+      <div className="telemetry-grid">
+        <div><div className="panel-label">MEMORY USED</div><div className="telemetry-value">{(telemetry.memory.usedBytes / 1024 ** 3).toFixed(2)} GB</div><div className="panel-note">{(telemetry.memory.totalBytes / 1024 ** 3).toFixed(2)} GB total</div></div>
+        <div><div className="panel-label">MEMORY PRESSURE</div><div className="telemetry-value">{telemetry.memory.totalBytes ? Math.round(telemetry.memory.usedBytes / telemetry.memory.totalBytes * 100) : 0}%</div><div className="panel-note">Current system snapshot</div></div>
+        <div><div className="panel-label">LOAD AVERAGE</div><div className="telemetry-value">{telemetry.loadAverage.map((value) => value.toFixed(2)).join(" / ")}</div><div className="panel-note">Platform-reported 1 / 5 / 15 min</div></div>
+        <div><div className="panel-label">SYSTEM UPTIME</div><div className="telemetry-value">{Math.floor(telemetry.uptimeSeconds / 3600)}h {Math.floor(telemetry.uptimeSeconds % 3600 / 60)}m</div><div className="panel-note">Since last system boot</div></div>
+      </div>
+    </section>}
     <section className="agents">{visibleAgents.slice(0, 6).map(({ agentId, state, lastTaskId }, i) =>
       <motion.article key={agentId} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * .08 }}>
         <div className="agent-name">{agentId.toUpperCase()}</div><div className="agent-state">{state}</div>
