@@ -1,5 +1,5 @@
 import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent, getRuntimeHealth, JsonLogger, RuntimeFileBridge, loadRuntimeConfig, ApprovalManager, EmergencyStop, ToolGateway, DefaultPermissionPolicy, systemSnapshotTool, windowsProcessListTool, windowsNetworkSnapshotTool, windowsDiskSnapshotTool } from "@jarvis/core";
-import { SystemAgent } from "@jarvis/agents";
+import { ResearchAgent, SystemAgent } from "@jarvis/agents";
 
 export interface RuntimeHost {
   eventBus: InMemoryEventBus;
@@ -26,6 +26,8 @@ export function createRuntime(): RuntimeHost {
   const supervisor = new Supervisor();
   const systemAgent = new SystemAgent(getSystemSnapshot);
   registry.register(systemAgent.descriptor, systemAgent);
+  const researchAgent = new ResearchAgent();
+  registry.register(researchAgent.descriptor, researchAgent);
   const taskStore = new JsonFileTaskStore(config.taskStorePath);
   const worker = new RuntimeWorker(orchestrator, taskStore, config.workerIntervalMs);
   const history = new RuntimeEventHistory();
