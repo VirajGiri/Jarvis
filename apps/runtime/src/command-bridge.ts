@@ -1,12 +1,28 @@
 import { mkdir, readdir, readFile, unlink } from "node:fs/promises";
 import path from "node:path";
-import { createTask, type JsonFileTaskStore, type Orchestrator } from "@jarvis/core";
+import { createTask, createRuntimeEvent, type ApprovalManager, type InMemoryEventBus, type JsonFileTaskStore, type Orchestrator, type ToolGateway } from "@jarvis/core";
 
 interface ResearchCommand {
   id: string;
   type: "research.submit";
   query: string;
   sources: Array<{ title: string; content: string; url?: string }>;
+}
+
+interface ApprovalCommand {
+  id: string;
+  type: "approval.resolve";
+  approvalId: string;
+  decision: "APPROVE" | "DENY";
+}
+
+function isApprovalCommand(value: unknown): value is ApprovalCommand {
+  if (!value || typeof value !== "object") return false;
+  const command = value as Partial<ApprovalCommand>;
+  return command.type === "approval.resolve" &&
+    typeof command.id === "string" && /^[a-f0-9-]{36}$/i.test(command.id) &&
+    typeof command.approvalId === "string" && /^[a-f0-9-]{36}$/i.test(command.approvalId) &&
+    (command.decision === "APPROVE" || command.decision === "DENY");
 }
 
 function isResearchCommand(value: unknown): value is ResearchCommand {
@@ -27,7 +43,9 @@ export class RuntimeCommandBridge {
   constructor(
     private readonly directory: string,
     private readonly store: JsonFileTaskStore,
-    private readonly orchestrator: Orchestrator
+    private readonly orchestrator: Orchestrator,
+    private readonly gateway: ToolGateway,
+    private readonly events: InMemoryEventBus
   ) {}
 
   async processPending(): Promise<number> {
@@ -43,20 +61,29 @@ export class RuntimeCommandBridge {
         try {
           const raw = await readFile(filePath, "utf8");
           const parsed: unknown = JSON.parse(raw);
-          if (!isResearchCommand(parsed)) {
+          if (isResearchCommand(parsed)) {
+            const taskId = `research-${parsed.id}`;
+            const existing = await this.store.list();
+            if (!existing.some((task) => task.id === taskId)) {
+              const task = createTask(taskId, "research", {
+                query: parsed.query.trim(),
+                sources: parsed.sources
+              });
+              await this.store.save(task);
+              await this.orchestrator.submit(task);
+              accepted += 1;
+            }
             await unlink(filePath);
             continue;
           }
-          const taskId = `research-${parsed.id}`;
-          const existing = await this.store.list();
-          if (!existing.some((task) => task.id === taskId)) {
-            const task = createTask(taskId, "research", {
-              query: parsed.query.trim(),
-              sources: parsed.sources
-            });
-            await this.store.save(task);
-            await this.orchestrator.submit(task);
+          if (isApprovalCommand(parsed)) {
+            await this.gateway.resolveApproval(parsed.approvalId, parsed.decision);
+            await this.events.publish(createRuntimeEvent("runtime.approval.resolved", "security", {
+              approvalId: parsed.approvalId, decision: parsed.decision
+            }));
+            await unlink(filePath);
             accepted += 1;
+            continue;
           }
           await unlink(filePath);
         } catch (error) {
