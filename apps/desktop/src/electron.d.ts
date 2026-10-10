@@ -3,6 +3,7 @@ export {};
 declare global {
   interface Window {
     jarvis?: {
+      submitResearch(payload: { query: string; sourceTitle: string; sourceContent: string }): Promise<{ accepted: boolean; id: string }>;
       getStatus(): Promise<{
         state: string;
         activeTasks: number;
