@@ -3,7 +3,7 @@ import { DefaultPermissionPolicy } from "./permissions";
 import { ToolGateway } from "./tool-gateway";
 
 describe("security boundary", () => {
-  it("allows read tools and gates privileged risks", () => {
+  it("allows read tools and gates privileged risks", async () => {
     const gateway = new ToolGateway(new DefaultPermissionPolicy());
     gateway.register({
       id: "test.read",
@@ -16,7 +16,7 @@ describe("security boundary", () => {
       async execute() { return { changed: true }; }
     });
 
-    expect(gateway.execute({
+    await expect(gateway.execute({
       tool: "test.read",
       risk: "READ",
       input: {},
@@ -28,6 +28,6 @@ describe("security boundary", () => {
       risk: "WRITE",
       input: {},
       reason: "test"
-    })).rejects.toThrow("PERMISSION_APPROVAL_REQUIRED");
+    })).rejects.toThrow("APPROVAL_REQUIRED:");
   });
 });
