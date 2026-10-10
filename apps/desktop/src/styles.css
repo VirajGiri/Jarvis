@@ -15,3 +15,7 @@
 .jarvis{overflow-y:auto;height:100vh}
 .core{height:44vh}
 @media(max-height:850px){.core{height:35vh}.core-ring{width:220px;height:220px}.core-label{margin-top:-125px}}
+
+.telemetry-panel{margin-top:12px;border:1px solid rgba(99,217,255,.14);background:rgba(9,18,29,.72);padding:14px 16px}
+.telemetry-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.telemetry-value{font-size:18px;margin-top:8px;color:#a8e9ff;font-variant-numeric:tabular-nums}
