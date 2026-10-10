@@ -37,8 +37,7 @@ export class Orchestrator {
     }
 
     try {
-      const output = await agent.execute(task);
-      const result = { taskId: task.id, success: true, output, completedAt: new Date().toISOString() };
+      const result = await agent.execute(task);
       if (this.events) {
         await publishAgentStatus(this.events, agent.status());
         await publishTaskCompleted(this.events, result);
