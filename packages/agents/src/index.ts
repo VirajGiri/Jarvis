@@ -95,3 +95,5 @@ export class SystemAgent extends BaseAgent {
     }
   }
 }
+
+export { ResearchAgent, SourceDigestResearchProvider, type ResearchProvider, type ResearchSource, type ResearchReport, type ResearchFinding } from "./research-agent";
