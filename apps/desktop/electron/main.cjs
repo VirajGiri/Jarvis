@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const path = require("node:path");
+const crypto = require("node:crypto");
 
 const isDev = !app.isPackaged;
 let mainWindow;
@@ -9,6 +10,7 @@ let eventWatcher;
 let eventOffset = 0;
 const runtimeStatePath = process.env.JARVIS_RUNTIME_STATUS_PATH || path.resolve(process.cwd(), "../runtime/.jarvis/runtime-status.json");
 const runtimeEventsPath = process.env.JARVIS_RUNTIME_EVENTS_PATH || path.resolve(process.cwd(), "../runtime/.jarvis/runtime-events.ndjson");
+const runtimeCommandsPath = path.join(path.dirname(runtimeStatePath), "commands");
 const fallbackState = { state: "STOPPED", activeTasks: 0, queuedTasks: 0, agents: [], updatedAt: new Date(0).toISOString() };
 
 async function readRuntimeState() {
@@ -66,6 +68,25 @@ function createWindow() {
 }
 
 ipcMain.handle("jarvis:status", () => readRuntimeState());
+
+ipcMain.handle("jarvis:research:submit", async (_event, payload) => {
+  if (!payload || typeof payload !== "object") throw new Error("INVALID_RESEARCH_PAYLOAD");
+  const query = typeof payload.query === "string" ? payload.query.trim() : "";
+  const sourceTitle = typeof payload.sourceTitle === "string" ? payload.sourceTitle.trim() : "";
+  const sourceContent = typeof payload.sourceContent === "string" ? payload.sourceContent.trim() : "";
+  if (!query || query.length > 2000) throw new Error("RESEARCH_QUERY_REQUIRED_OR_TOO_LONG");
+  if (sourceTitle.length > 200 || sourceContent.length > 12000) throw new Error("RESEARCH_SOURCE_TOO_LARGE");
+  const id = crypto.randomUUID();
+  const command = {
+    id,
+    type: "research.submit",
+    query,
+    sources: sourceContent ? [{ title: sourceTitle || "User supplied source", content: sourceContent }] : []
+  };
+  await fsp.mkdir(runtimeCommandsPath, { recursive: true });
+  await fsp.writeFile(path.join(runtimeCommandsPath, id + ".json"), JSON.stringify(command), { encoding: "utf8", flag: "wx" });
+  return { accepted: true, id };
+});
 
 
 app.whenReady().then(() => {
