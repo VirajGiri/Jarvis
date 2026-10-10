@@ -57,8 +57,8 @@ export default function App() {
     const unsubscribe = window.jarvis?.onEvent((event) => {
       setEvents((previous) => [event, ...previous.filter((item) => item.id !== event.id)].slice(0, 8));
       if (event.type === "runtime.task.completed") {
-        const result = event.payload.result as { output?: { output?: unknown }; error?: { message?: string } } | undefined;
-        if (result?.output?.output !== undefined) setResearchResult(JSON.stringify(result.output.output, null, 2));
+        const result = event.payload.result as { output?: unknown; error?: { message?: string } } | undefined;
+        if (result?.output !== undefined) setResearchResult(JSON.stringify(result.output, null, 2));
         else if (result?.error?.message) setResearchResult(result.error.message);
       }
       void refresh();
