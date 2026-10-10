@@ -13,7 +13,8 @@ export interface RuntimeHost {
   logger: JsonLogger;
   fileBridge: RuntimeFileBridge;
   approvals: ApprovalManager;
-  emergencyStop: EmergencyStop;\n  toolGateway: ToolGateway;
+  emergencyStop: EmergencyStop;
+  toolGateway: ToolGateway;
 }
 
 export function createRuntime(): RuntimeHost {
