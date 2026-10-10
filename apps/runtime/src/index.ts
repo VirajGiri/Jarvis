@@ -39,14 +39,14 @@ export function createRuntime(): RuntimeHost {
   const approvals = new ApprovalManager();
   const emergencyStop = new EmergencyStop();
   const toolGateway = new ToolGateway(new DefaultPermissionPolicy(), approvals, emergencyStop);
-  const commandBridge = new RuntimeCommandBridge(path.join(config.runtimeStateDir, "commands"), taskStore, orchestrator);
+  const commandBridge = new RuntimeCommandBridge(path.join(config.runtimeStateDir, "commands"), taskStore, orchestrator, toolGateway, eventBus);
   for (const tool of [systemSnapshotTool, windowsProcessListTool, windowsNetworkSnapshotTool, windowsDiskSnapshotTool]) toolGateway.register(tool);
 
-  for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status"]) {
+  for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status", "runtime.approval.resolved"]) {
     eventBus.subscribe(eventType, async (event) => {
       await history.append(event as any);
       await fileBridge.appendEvent(event as any);
-      const status = { ...getRuntimeHealth(registry, orchestrator, worker), telemetry: await getSystemSnapshot() };
+      const status = { ...getRuntimeHealth(registry, orchestrator, worker), telemetry: await getSystemSnapshot(), pendingApprovals: approvals.listPending().map(({ id, request, createdAt }) => ({ id, tool: request.tool, risk: request.risk, reason: request.reason, createdAt })) };
       await fileBridge.writeStatus(status);
     });
   }
