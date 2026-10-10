@@ -1,6 +1,6 @@
 import { mkdir, readdir, readFile, unlink } from "node:fs/promises";
 import path from "node:path";
-import { createTask, createRuntimeEvent, type ApprovalManager, type InMemoryEventBus, type JsonFileTaskStore, type Orchestrator, type ToolGateway } from "@jarvis/core";
+import { createTask, createRuntimeEvent, type InMemoryEventBus, type JsonFileTaskStore, type Orchestrator, type ToolGateway } from "@jarvis/core";
 
 interface ResearchCommand {
   id: string;
