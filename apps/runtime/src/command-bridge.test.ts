@@ -42,4 +42,32 @@ describe("RuntimeCommandBridge", () => {
     expect(await bridge.processPending()).toBe(0);
     expect(queue.size()).toBe(0);
   });
+  it("resolves a privileged tool request only through an approval command", async () => {
+    directory = await mkdtemp(path.join(os.tmpdir(), "jarvis-commands-"));
+    const commands = path.join(directory, "commands");
+    await mkdir(commands, { recursive: true });
+    const approvals = new ApprovalManager();
+    const events = new InMemoryEventBus();
+    const gateway = new ToolGateway(new DefaultPermissionPolicy(), approvals);
+    let executed = false;
+    gateway.register({ id: "test.write", risk: "WRITE", async execute() { executed = true; return { ok: true }; } });
+    let approvalId = "";
+    try {
+      await gateway.execute({ tool: "test.write", risk: "WRITE", input: {}, reason: "explicit test" });
+    } catch (error) {
+      approvalId = String(error).split("APPROVAL_REQUIRED: ")[1] ?? "";
+    }
+    expect(approvalId).not.toBe("");
+    const commandId = "c7c1d4a2-3e5f-4a6b-8c9d-0123456789ab";
+    await writeFile(path.join(commands, commandId + ".json"), JSON.stringify({
+      id: commandId, type: "approval.resolve", approvalId, decision: "APPROVE"
+    }));
+    const queue = new PriorityTaskQueue();
+    const bridge = new RuntimeCommandBridge(commands, new JsonFileTaskStore(path.join(directory, "tasks.json")), new Orchestrator(new AgentRegistry(), queue, events), gateway, events);
+
+    expect(await bridge.processPending()).toBe(1);
+    expect(executed).toBe(true);
+    expect(approvals.listPending()).toHaveLength(0);
+  });
+
 });
