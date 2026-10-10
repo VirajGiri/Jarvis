@@ -9,8 +9,8 @@
     "start": "node dist/main.js"
   },
   "dependencies": {
-    "@jarvis/agents": "workspace:*",
-    "@jarvis/contracts": "workspace:*",
-    "@jarvis/core": "workspace:*"
+    "@jarvis/agents": "0.1.0",
+    "@jarvis/contracts": "0.1.0",
+    "@jarvis/core": "0.1.0"
   }
 }
