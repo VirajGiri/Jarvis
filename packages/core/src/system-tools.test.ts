@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getSystemSnapshot, parseWindowsProcessCsv } from "./system-tools";
+import { getSystemSnapshot, parseWindowsProcessCsv, parseWindowsDiskJson } from "./system-tools";
 
 describe("system tools", () => {
   it("returns a local runtime snapshot", async () => {
@@ -19,6 +19,11 @@ describe("system tools", () => {
       sessionName: "Console",
       sessionNumber: 1,
       memoryBytes: 123456
+    }]);
+  });
+  it("parses Windows disk telemetry into byte counts", () => {
+    expect(parseWindowsDiskJson('{"Name":"C","Used":700,"Free":300}')).toEqual([{
+      filesystem: "C", sizeBytes: 1000, freeBytes: 300, usedBytes: 700
     }]);
   });
 });
