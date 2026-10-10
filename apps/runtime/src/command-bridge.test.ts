@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue } from "@jarvis/core";
+import { AgentRegistry, ApprovalManager, DefaultPermissionPolicy, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, ToolGateway } from "@jarvis/core";
 import { RuntimeCommandBridge } from "./command-bridge";
 
 describe("RuntimeCommandBridge", () => {
@@ -24,7 +24,7 @@ describe("RuntimeCommandBridge", () => {
     }));
     const queue = new PriorityTaskQueue();
     const store = new JsonFileTaskStore(path.join(directory, "tasks.json"));
-    const bridge = new RuntimeCommandBridge(commands, store, new Orchestrator(new AgentRegistry(), queue, new InMemoryEventBus()));
+    const bridge = new RuntimeCommandBridge(commands, store, new Orchestrator(new AgentRegistry(), queue, new InMemoryEventBus()), new ToolGateway(new DefaultPermissionPolicy(), new ApprovalManager()), new InMemoryEventBus());
 
     expect(await bridge.processPending()).toBe(1);
     expect(queue.size()).toBe(1);
@@ -37,7 +37,7 @@ describe("RuntimeCommandBridge", () => {
     await mkdir(commands, { recursive: true });
     await writeFile(path.join(commands, "bad.json"), JSON.stringify({ type: "system.exec", command: "unsafe" }));
     const queue = new PriorityTaskQueue();
-    const bridge = new RuntimeCommandBridge(commands, new JsonFileTaskStore(path.join(directory, "tasks.json")), new Orchestrator(new AgentRegistry(), queue, new InMemoryEventBus()));
+    const bridge = new RuntimeCommandBridge(commands, new JsonFileTaskStore(path.join(directory, "tasks.json")), new Orchestrator(new AgentRegistry(), queue, new InMemoryEventBus()), new ToolGateway(new DefaultPermissionPolicy(), new ApprovalManager()), new InMemoryEventBus());
 
     expect(await bridge.processPending()).toBe(0);
     expect(queue.size()).toBe(0);
