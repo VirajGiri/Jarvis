@@ -11,7 +11,7 @@ export interface RuntimeHost {
   worker: RuntimeWorker;
   history: RuntimeEventHistory;
   logger: JsonLogger;
-  fileBridge: RuntimeFileBridge;
+  fileBridge: RuntimeFileBridge;\n  approvals: import("@jarvis/core").ApprovalManager;\n  emergencyStop: import("@jarvis/core").EmergencyStop;
 }
 
 export function createRuntime(): RuntimeHost {
