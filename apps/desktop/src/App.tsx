@@ -36,6 +36,7 @@ export default function App() {
   const [researchResult, setResearchResult] = useState("");
   const [pendingApprovals, setPendingApprovals] = useState<ApprovalView[]>([]);
   const [approvalAction, setApprovalAction] = useState("");
+  const [approvalStatus, setApprovalStatus] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -74,7 +75,7 @@ export default function App() {
     setApprovalAction(approvalId);
     try {
       await window.jarvis.resolveApproval({ approvalId, decision });
-      setResearchStatus(decision === "APPROVE" ? "Approval decision submitted." : "Denial submitted.");
+      setApprovalStatus(decision === "APPROVE" ? "Approval decision submitted." : "Denial submitted.");
     } catch (error) {
       setResearchStatus(error instanceof Error ? error.message : "Unable to resolve approval.");
     } finally {
@@ -134,6 +135,7 @@ export default function App() {
         </div>
       </article>) : <div className="empty-events">No privileged tool requests are waiting for approval.</div>}
       <div className="panel-note">Approving executes the exact registered tool request. Emergency stop and tool-risk checks remain enforced.</div>
+      {approvalStatus && <div className="panel-note">{approvalStatus}</div>}
     </section>
     <section className="research-panel">
       <div className="panel-heading"><span>RESEARCH AGENT</span><span>OFFLINE SOURCE-DIGEST MODE</span></div>
