@@ -11,7 +11,9 @@ export interface RuntimeHost {
   worker: RuntimeWorker;
   history: RuntimeEventHistory;
   logger: JsonLogger;
-  fileBridge: RuntimeFileBridge;\n  approvals: import("@jarvis/core").ApprovalManager;\n  emergencyStop: import("@jarvis/core").EmergencyStop;
+  fileBridge: RuntimeFileBridge;
+  approvals: ApprovalManager;
+  emergencyStop: EmergencyStop;
 }
 
 export function createRuntime(): RuntimeHost {
@@ -27,7 +29,9 @@ export function createRuntime(): RuntimeHost {
   const worker = new RuntimeWorker(orchestrator, taskStore, config.workerIntervalMs);
   const history = new RuntimeEventHistory();
   const logger = new JsonLogger("runtime");
-  const fileBridge = new RuntimeFileBridge(config.runtimeStateDir);\n  const approvals = new ApprovalManager();\n  const emergencyStop = new EmergencyStop();
+  const fileBridge = new RuntimeFileBridge(config.runtimeStateDir);
+  const approvals = new ApprovalManager();
+  const emergencyStop = new EmergencyStop();
 
   for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status"]) {
     eventBus.subscribe(eventType, async (event) => {
