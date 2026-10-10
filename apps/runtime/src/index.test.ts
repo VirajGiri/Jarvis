@@ -5,6 +5,7 @@ describe("runtime host", () => {
   it("starts with a registered system agent and worker", async () => {
     const runtime = createRuntime();
     expect(runtime.registry.list().map((agent) => agent.id)).toContain("system");
+    expect(runtime.registry.list().map((agent) => agent.id)).toContain("research");
 
     await startRuntime(runtime);
     expect(getRuntimeStatus(runtime).state).toBe("RUNNING");
