@@ -1,3 +1,5 @@
+import path from "node:path";
+import { RuntimeCommandBridge } from "./command-bridge";
 import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent, getRuntimeHealth, JsonLogger, RuntimeFileBridge, loadRuntimeConfig, ApprovalManager, EmergencyStop, ToolGateway, DefaultPermissionPolicy, systemSnapshotTool, windowsProcessListTool, windowsNetworkSnapshotTool, windowsDiskSnapshotTool } from "@jarvis/core";
 import { ResearchAgent, SystemAgent } from "@jarvis/agents";
 
@@ -15,6 +17,7 @@ export interface RuntimeHost {
   approvals: ApprovalManager;
   emergencyStop: EmergencyStop;
   toolGateway: ToolGateway;
+  commandBridge: RuntimeCommandBridge;
 }
 
 export function createRuntime(): RuntimeHost {
@@ -36,6 +39,7 @@ export function createRuntime(): RuntimeHost {
   const approvals = new ApprovalManager();
   const emergencyStop = new EmergencyStop();
   const toolGateway = new ToolGateway(new DefaultPermissionPolicy(), approvals, emergencyStop);
+  const commandBridge = new RuntimeCommandBridge(path.join(config.runtimeStateDir, "commands"), taskStore, orchestrator);
   for (const tool of [systemSnapshotTool, windowsProcessListTool, windowsNetworkSnapshotTool, windowsDiskSnapshotTool]) toolGateway.register(tool);
 
   for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status"]) {
@@ -47,7 +51,7 @@ export function createRuntime(): RuntimeHost {
     });
   }
 
-  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history, logger, fileBridge, approvals, emergencyStop, toolGateway };
+  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history, logger, fileBridge, approvals, emergencyStop, toolGateway, commandBridge };
 }
 
 export async function startRuntime(runtime: RuntimeHost): Promise<void> {
