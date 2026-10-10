@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 type AgentView = { agentId: string; state: string; lastTaskId?: string; updatedAt?: string };
 type RuntimeEvent = { id: string; type: string; source: string; timestamp: string; payload: Record<string, unknown> };
@@ -28,6 +28,11 @@ export default function App() {
   const [events, setEvents] = useState<RuntimeEvent[]>([]);
   const [lastUpdate, setLastUpdate] = useState("");
   const [telemetry, setTelemetry] = useState<TelemetryView | null>(null);
+  const [researchQuery, setResearchQuery] = useState("");
+  const [researchSourceTitle, setResearchSourceTitle] = useState("");
+  const [researchSourceContent, setResearchSourceContent] = useState("");
+  const [researchStatus, setResearchStatus] = useState("");
+  const [researchResult, setResearchResult] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -47,6 +52,11 @@ export default function App() {
     void refresh();
     const unsubscribe = window.jarvis?.onEvent((event) => {
       setEvents((previous) => [event, ...previous.filter((item) => item.id !== event.id)].slice(0, 8));
+      if (event.type === "runtime.task.completed") {
+        const result = event.payload.result as { output?: { output?: unknown }; error?: { message?: string } } | undefined;
+        if (result?.output?.output !== undefined) setResearchResult(JSON.stringify(result.output.output, null, 2));
+        else if (result?.error?.message) setResearchResult(result.error.message);
+      }
       void refresh();
     });
     const timer = window.setInterval(() => void refresh(), 2000);
@@ -54,6 +64,19 @@ export default function App() {
   }, []);
 
   const visibleAgents: AgentView[] = agents.length ? agents : fallbackAgents.map((agentId) => ({ agentId, state: "NOT REGISTERED" }));
+
+  const submitResearch = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!window.jarvis) { setResearchStatus("Research submission is available in the desktop app."); return; }
+    if (!researchQuery.trim()) { setResearchStatus("Enter a research question."); return; }
+    setResearchStatus("Submitting research task…");
+    try {
+      const response = await window.jarvis.submitResearch({ query: researchQuery.trim(), sourceTitle: researchSourceTitle.trim(), sourceContent: researchSourceContent.trim() });
+      setResearchStatus(response.accepted ? "Task accepted by the runtime." : "Task was not accepted.");
+    } catch (error) {
+      setResearchStatus(error instanceof Error ? error.message : "Unable to submit research task.");
+    }
+  };
 
   return <main className="jarvis">
     <header>
@@ -80,6 +103,22 @@ export default function App() {
         <div><div className="panel-label">SYSTEM UPTIME</div><div className="telemetry-value">{Math.floor(telemetry.uptimeSeconds / 3600)}h {Math.floor(telemetry.uptimeSeconds % 3600 / 60)}m</div><div className="panel-note">Since last system boot</div></div>
       </div>
     </section>}
+    <section className="research-panel">
+      <div className="panel-heading"><span>RESEARCH AGENT</span><span>OFFLINE SOURCE-DIGEST MODE</span></div>
+      <form onSubmit={submitResearch} className="research-form">
+        <label>Research question
+          <input value={researchQuery} onChange={(event) => setResearchQuery(event.target.value)} maxLength={2000} placeholder="What do you want to investigate?" />
+        </label>
+        <label>Source title (optional)
+          <input value={researchSourceTitle} onChange={(event) => setResearchSourceTitle(event.target.value)} maxLength={200} placeholder="Report, article, notes…" />
+        </label>
+        <label>Source text (optional)
+          <textarea value={researchSourceContent} onChange={(event) => setResearchSourceContent(event.target.value)} maxLength={12000} rows={3} placeholder="Paste source text for grounded extraction. No web search is performed yet." />
+        </label>
+        <div className="research-actions"><button type="submit">Submit research task</button><span>{researchStatus}</span></div>
+      </form>
+      {researchResult && <div className="research-result"><div className="panel-label">LATEST RESEARCH OUTPUT</div><pre>{researchResult}</pre></div>}
+    </section>
     <section className="agents">{visibleAgents.slice(0, 6).map(({ agentId, state, lastTaskId }, i) =>
       <motion.article key={agentId} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * .08 }}>
         <div className="agent-name">{agentId.toUpperCase()}</div><div className="agent-state">{state}</div>
