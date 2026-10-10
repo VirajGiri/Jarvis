@@ -9,12 +9,15 @@ export function getRuntimeHealth(
   worker: RuntimeWorker
 ): RuntimeStatus {
   const agents = registry.statuses();
-  const failed = agents.filter((agent) => agent.state === "FAILED").length;
+  const failed = agents.some((agent) => agent.state === "FAILED");
+  const allPaused = agents.length > 0 && agents.every((agent) => agent.state === "PAUSED");
   const state = !worker.isRunning()
     ? "STOPPED"
-    : failed > 0
+    : failed
       ? "DEGRADED"
-      : "RUNNING";
+      : allPaused
+        ? "DEGRADED"
+        : "RUNNING";
 
   return {
     state,
