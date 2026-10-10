@@ -45,7 +45,7 @@ export async function getSystemSnapshot(): Promise<SystemSnapshot> {
 }
 
 export function parseWindowsProcessCsv(csv: string): ProcessSnapshot[] {
-  return csv.split(/\r?\n/).filter(Boolean).map((line) => {
+  return csv.split(/\r?\n/).filter((line) => line.trim() && !line.includes('"Image Name"')).map((line) => {
     const fields = [...line.matchAll(/"([^"]*)"/g)].map((match) => match[1]);
     const memory = Number.parseInt((fields[4] ?? "0").replace(/[^0-9]/g, ""), 10) || 0;
     return {
