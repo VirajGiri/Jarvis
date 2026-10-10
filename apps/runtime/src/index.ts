@@ -38,7 +38,8 @@ export function createRuntime(): RuntimeHost {
     eventBus.subscribe(eventType, async (event) => {
       await history.append(event as any);
       await fileBridge.appendEvent(event as any);
-      await fileBridge.writeStatus(getRuntimeHealth(registry, orchestrator, worker));
+      const status = { ...getRuntimeHealth(registry, orchestrator, worker), telemetry: await getSystemSnapshot() };
+      await fileBridge.writeStatus(status);
     });
   }
 
