@@ -53,7 +53,7 @@ export default function App() {
     return () => { mounted = false; unsubscribe?.(); window.clearInterval(timer); };
   }, []);
 
-  const visibleAgents = agents.length ? agents : fallbackAgents.map((agentId) => ({ agentId, state: "NOT REGISTERED" }));
+  const visibleAgents: AgentView[] = agents.length ? agents : fallbackAgents.map((agentId) => ({ agentId, state: "NOT REGISTERED" }));
 
   return <main className="jarvis">
     <header>
