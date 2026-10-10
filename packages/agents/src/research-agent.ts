@@ -1,5 +1,4 @@
-import type { AgentResult, AgentTask } from "@jarvis/contracts";
-import { BaseAgent } from "./index";
+import type { AgentDescriptor, AgentResult, AgentState, AgentStatus, AgentTask } from "@jarvis/contracts";
 
 export interface ResearchSource {
   title: string;
@@ -60,14 +59,22 @@ export class SourceDigestResearchProvider implements ResearchProvider {
   }
 }
 
-export class ResearchAgent extends BaseAgent {
-  constructor(private readonly provider: ResearchProvider = new SourceDigestResearchProvider()) {
-    super("research", "Research Agent", ["research.digest", "research.source-analysis"]);
-  }
+export class ResearchAgent {
+  readonly id = "research";
+  readonly name = "Research Agent";
+  readonly descriptor: AgentDescriptor = { id: this.id, name: this.name, version: "0.1.0", capabilities: ["research.digest", "research.source-analysis"] };
+  private state: AgentState = "REGISTERED";
+  private lastTaskId?: string;
+
+  constructor(private readonly provider: ResearchProvider = new SourceDigestResearchProvider()) {}
+
+  async start(): Promise<void> { this.state = "IDLE"; }
+  async stop(): Promise<void> { this.state = "PAUSED"; }
+  status(): AgentStatus { return { agentId: this.id, state: this.state, lastTaskId: this.lastTaskId, updatedAt: new Date().toISOString() }; }
 
   async execute(task: AgentTask): Promise<AgentResult> {
-    this.begin(task.id);
-    this.executing();
+    this.lastTaskId = task.id;
+    this.state = "EXECUTING";
     try {
       const query = typeof task.input.query === "string" ? task.input.query.trim() : "";
       if (!query) throw new Error("RESEARCH_QUERY_REQUIRED");
@@ -78,10 +85,10 @@ export class ResearchAgent extends BaseAgent {
         typeof (source as ResearchSource).content === "string"
       );
       const output = await this.provider.research(query, sources);
-      this.complete();
+      this.state = "COMPLETED";
       return { taskId: task.id, success: true, output, completedAt: new Date().toISOString() };
     } catch (error) {
-      this.fail();
+      this.state = "FAILED";
       return {
         taskId: task.id,
         success: false,
