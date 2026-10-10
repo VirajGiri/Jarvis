@@ -106,6 +106,21 @@ export interface DiskSnapshot {
   usedBytes: number;
 }
 
+export function parseWindowsDiskJson(raw: string): DiskSnapshot[] {
+  const parsed = JSON.parse(raw || "[]");
+  const drives = Array.isArray(parsed) ? parsed : [parsed];
+  return drives.map((item: Record<string, unknown>) => {
+    const usedBytes = Number(item.Used ?? 0) || 0;
+    const freeBytes = Number(item.Free ?? 0) || 0;
+    return {
+      filesystem: String(item.Name ?? ""),
+      sizeBytes: usedBytes + freeBytes,
+      freeBytes,
+      usedBytes
+    };
+  });
+}
+
 export const windowsDiskSnapshotTool: JarvisTool = {
   id: "windows.disk-snapshot",
   risk: "READ",
