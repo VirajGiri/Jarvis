@@ -32,7 +32,9 @@ export function createRuntime(): RuntimeHost {
   const logger = new JsonLogger("runtime");
   const fileBridge = new RuntimeFileBridge(config.runtimeStateDir);
   const approvals = new ApprovalManager();
-  const emergencyStop = new EmergencyStop();\n  const toolGateway = new ToolGateway(new DefaultPermissionPolicy(), approvals, emergencyStop);\n  for (const tool of [systemSnapshotTool, windowsProcessListTool, windowsNetworkSnapshotTool, windowsDiskSnapshotTool]) toolGateway.register(tool);
+  const emergencyStop = new EmergencyStop();
+  const toolGateway = new ToolGateway(new DefaultPermissionPolicy(), approvals, emergencyStop);
+  for (const tool of [systemSnapshotTool, windowsProcessListTool, windowsNetworkSnapshotTool, windowsDiskSnapshotTool]) toolGateway.register(tool);
 
   for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status"]) {
     eventBus.subscribe(eventType, async (event) => {
