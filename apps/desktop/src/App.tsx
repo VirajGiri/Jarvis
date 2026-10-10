@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 type AgentView = { agentId: string; state: string; lastTaskId?: string; updatedAt?: string };
 type RuntimeEvent = { id: string; type: string; source: string; timestamp: string; payload: Record<string, unknown> };
 type TelemetryView = { hostname: string; platform: string; uptimeSeconds: number; memory: { totalBytes: number; freeBytes: number; usedBytes: number }; loadAverage: number[] };
+type ApprovalView = { id: string; tool: string; risk: string; reason: string; createdAt: string };
 const fallbackAgents = ["CORE", "RESEARCH", "CODING", "BROWSER", "SYSTEM", "SECURITY"];
 
 function CoreVisual() {
@@ -33,6 +34,8 @@ export default function App() {
   const [researchSourceContent, setResearchSourceContent] = useState("");
   const [researchStatus, setResearchStatus] = useState("");
   const [researchResult, setResearchResult] = useState("");
+  const [pendingApprovals, setPendingApprovals] = useState<ApprovalView[]>([]);
+  const [approvalAction, setApprovalAction] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -44,6 +47,7 @@ export default function App() {
       setAgents(status.agents.map((agent) => ({ agentId: agent.agentId, state: agent.state, lastTaskId: agent.lastTaskId, updatedAt: agent.updatedAt })));
       setLastUpdate(status.updatedAt);
       setTelemetry(status.telemetry ?? null);
+      setPendingApprovals(status.pendingApprovals ?? []);
     };
     const refresh = async () => {
       if (!window.jarvis) { setRuntime("BROWSER MODE"); return; }
@@ -64,6 +68,19 @@ export default function App() {
   }, []);
 
   const visibleAgents: AgentView[] = agents.length ? agents : fallbackAgents.map((agentId) => ({ agentId, state: "NOT REGISTERED" }));
+
+  const resolveApproval = async (approvalId: string, decision: "APPROVE" | "DENY") => {
+    if (!window.jarvis) return;
+    setApprovalAction(approvalId);
+    try {
+      await window.jarvis.resolveApproval({ approvalId, decision });
+      setResearchStatus(decision === "APPROVE" ? "Approval decision submitted." : "Denial submitted.");
+    } catch (error) {
+      setResearchStatus(error instanceof Error ? error.message : "Unable to resolve approval.");
+    } finally {
+      setApprovalAction("");
+    }
+  };
 
   const submitResearch = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -103,6 +120,21 @@ export default function App() {
         <div><div className="panel-label">SYSTEM UPTIME</div><div className="telemetry-value">{Math.floor(telemetry.uptimeSeconds / 3600)}h {Math.floor(telemetry.uptimeSeconds % 3600 / 60)}m</div><div className="panel-note">Since last system boot</div></div>
       </div>
     </section>}
+    <section className="approval-panel">
+      <div className="panel-heading"><span>PERMISSION APPROVALS</span><span>{pendingApprovals.length} PENDING</span></div>
+      {pendingApprovals.length ? pendingApprovals.map((approval) => <article className="approval-row" key={approval.id}>
+        <div className="approval-details">
+          <div className="approval-tool">{approval.tool} <span>{approval.risk}</span></div>
+          <div className="panel-note">{approval.reason || "No reason provided"}</div>
+          <div className="panel-note">{new Date(approval.createdAt).toLocaleString()}</div>
+        </div>
+        <div className="approval-actions">
+          <button disabled={approvalAction === approval.id} onClick={() => void resolveApproval(approval.id, "DENY")}>Deny</button>
+          <button disabled={approvalAction === approval.id} onClick={() => void resolveApproval(approval.id, "APPROVE")}>Approve &amp; execute</button>
+        </div>
+      </article>) : <div className="empty-events">No privileged tool requests are waiting for approval.</div>}
+      <div className="panel-note">Approving executes the exact registered tool request. Emergency stop and tool-risk checks remain enforced.</div>
+    </section>
     <section className="research-panel">
       <div className="panel-heading"><span>RESEARCH AGENT</span><span>OFFLINE SOURCE-DIGEST MODE</span></div>
       <form onSubmit={submitResearch} className="research-form">
