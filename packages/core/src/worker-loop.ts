@@ -33,7 +33,7 @@ export class RuntimeWorker implements TaskProcessor {
     if (this.running) return;
     await this.orchestrator.recover(await this.store.list());
     this.running = true;
-    void this.tick();
+    this.timer = setTimeout(() => void this.tick(), this.intervalMs);
   }
 
   async stop(): Promise<void> {
