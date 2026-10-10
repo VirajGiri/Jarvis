@@ -43,9 +43,9 @@ Active engineering queue for the jarvis-foundation branch.
 - [x] Runtime status IPC
 - [x] Live event stream
 - [x] Agent detail panel
-- [ ] Task queue panel
+- [x] Task queue metrics panel
 - [ ] Permission panel
-- [ ] System telemetry panel
+- [ ] Detailed system telemetry panel
 
 ## Reliability
 - [x] Unit-test foundation
