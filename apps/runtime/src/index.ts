@@ -1,4 +1,4 @@
-import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent, getRuntimeHealth, JsonLogger, RuntimeFileBridge, loadRuntimeConfig, ApprovalManager, EmergencyStop } from "@jarvis/core";
+import { AgentRegistry, InMemoryEventBus, JsonFileTaskStore, Orchestrator, PriorityTaskQueue, RuntimeWorker, Supervisor, getSystemSnapshot, RuntimeEventHistory, createRuntimeEvent, getRuntimeHealth, JsonLogger, RuntimeFileBridge, loadRuntimeConfig, ApprovalManager, EmergencyStop, ToolGateway, DefaultPermissionPolicy, systemSnapshotTool, windowsProcessListTool, windowsNetworkSnapshotTool, windowsDiskSnapshotTool } from "@jarvis/core";
 import { SystemAgent } from "@jarvis/agents";
 
 export interface RuntimeHost {
@@ -13,7 +13,7 @@ export interface RuntimeHost {
   logger: JsonLogger;
   fileBridge: RuntimeFileBridge;
   approvals: ApprovalManager;
-  emergencyStop: EmergencyStop;
+  emergencyStop: EmergencyStop;\n  toolGateway: ToolGateway;
 }
 
 export function createRuntime(): RuntimeHost {
@@ -31,7 +31,7 @@ export function createRuntime(): RuntimeHost {
   const logger = new JsonLogger("runtime");
   const fileBridge = new RuntimeFileBridge(config.runtimeStateDir);
   const approvals = new ApprovalManager();
-  const emergencyStop = new EmergencyStop();
+  const emergencyStop = new EmergencyStop();\n  const toolGateway = new ToolGateway(new DefaultPermissionPolicy(), approvals, emergencyStop);\n  for (const tool of [systemSnapshotTool, windowsProcessListTool, windowsNetworkSnapshotTool, windowsDiskSnapshotTool]) toolGateway.register(tool);
 
   for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status"]) {
     eventBus.subscribe(eventType, async (event) => {
@@ -41,7 +41,7 @@ export function createRuntime(): RuntimeHost {
     });
   }
 
-  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history, logger, fileBridge, approvals, emergencyStop };
+  return { eventBus, queue, registry, orchestrator, supervisor, taskStore, worker, history, logger, fileBridge, approvals, emergencyStop, toolGateway };
 }
 
 export async function startRuntime(runtime: RuntimeHost): Promise<void> {
