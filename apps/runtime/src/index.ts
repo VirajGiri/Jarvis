@@ -42,7 +42,7 @@ export function createRuntime(): RuntimeHost {
   const commandBridge = new RuntimeCommandBridge(path.join(config.runtimeStateDir, "commands"), taskStore, orchestrator, toolGateway, eventBus);
   for (const tool of [systemSnapshotTool, windowsProcessListTool, windowsNetworkSnapshotTool, windowsDiskSnapshotTool]) toolGateway.register(tool);
 
-  for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status", "runtime.approval.resolved"]) {
+  for (const eventType of ["runtime.task.submitted", "runtime.task.completed", "runtime.agent.status", "runtime.status", "runtime.approval.resolved", "runtime.approval.failed"]) {
     eventBus.subscribe(eventType, async (event) => {
       await history.append(event as any);
       await fileBridge.appendEvent(event as any);
