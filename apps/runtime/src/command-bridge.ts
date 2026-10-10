@@ -58,9 +58,10 @@ export class RuntimeCommandBridge {
       for (const entry of entries) {
         if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
         const filePath = path.join(this.directory, entry.name);
+        let parsed: unknown;
         try {
           const raw = await readFile(filePath, "utf8");
-          const parsed: unknown = JSON.parse(raw);
+          parsed = JSON.parse(raw);
           if (isResearchCommand(parsed)) {
             const taskId = `research-${parsed.id}`;
             const existing = await this.store.list();
@@ -91,6 +92,13 @@ export class RuntimeCommandBridge {
           // the command in place for the next poll.
           if (error instanceof SyntaxError) {
             await unlink(filePath).catch(() => undefined);
+          } else if (isApprovalCommand(parsed)) {
+            await unlink(filePath).catch(() => undefined);
+            await this.events.publish(createRuntimeEvent("runtime.approval.failed", "security", {
+              approvalId: parsed.approvalId,
+              decision: parsed.decision,
+              error: error instanceof Error ? error.message : String(error)
+            }));
           }
         }
       }
