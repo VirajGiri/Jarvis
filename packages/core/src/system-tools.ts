@@ -115,6 +115,6 @@ export const windowsDiskSnapshotTool: JarvisTool = {
       "-NoProfile", "-NonInteractive", "-Command",
       "Get-PSDrive -PSProvider FileSystem | Select-Object Name,Used,Free | ConvertTo-Json -Compress"
     ], { windowsHide: true, maxBuffer: 1024 * 1024 });
-    return { supported: true, disks: stdout };
+    return { supported: true, disks: parseWindowsDiskJson(stdout) };
   }
 };
