@@ -69,6 +69,20 @@ function createWindow() {
 
 ipcMain.handle("jarvis:status", () => readRuntimeState());
 
+ipcMain.handle("jarvis:approval:resolve", async (_event, payload) => {
+  if (!payload || typeof payload !== "object" ||
+      typeof payload.approvalId !== "string" ||
+      !/^[a-f0-9-]{36}$/i.test(payload.approvalId) ||
+      !["APPROVE", "DENY"].includes(payload.decision)) {
+    throw new Error("INVALID_APPROVAL_DECISION");
+  }
+  const id = crypto.randomUUID();
+  const command = { id, type: "approval.resolve", approvalId: payload.approvalId, decision: payload.decision };
+  await fsp.mkdir(runtimeCommandsPath, { recursive: true });
+  await fsp.writeFile(path.join(runtimeCommandsPath, id + ".json"), JSON.stringify(command), { encoding: "utf8", flag: "wx" });
+  return { accepted: true, id };
+});
+
 ipcMain.handle("jarvis:research:submit", async (_event, payload) => {
   if (!payload || typeof payload !== "object") throw new Error("INVALID_RESEARCH_PAYLOAD");
   const query = typeof payload.query === "string" ? payload.query.trim() : "";
