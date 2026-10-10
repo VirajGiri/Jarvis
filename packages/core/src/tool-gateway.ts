@@ -21,6 +21,22 @@ export class ToolGateway {
     this.tools.set(tool.id, tool);
   }
 
+  async resolveApproval(id: string, decision: "APPROVE" | "DENY"): Promise<unknown> {
+    const approval = this.approvals.get(id);
+    if (!approval) throw new Error(`APPROVAL_NOT_FOUND: ${id}`);
+    if (approval.status !== "PENDING") throw new Error(`APPROVAL_NOT_PENDING: ${id}`);
+    if (decision === "DENY") return this.approvals.deny(id);
+
+    this.emergencyStop.assertRunning();
+    const request = approval.request;
+    const tool = this.tools.get(request.tool);
+    if (!tool) throw new Error(`TOOL_NOT_FOUND: ${request.tool}`);
+    if (tool.risk !== request.risk) throw new Error(`TOOL_RISK_MISMATCH: ${request.tool}`);
+    const resolved = this.approvals.approve(id);
+    const output = await tool.execute(request.input);
+    return { approval: resolved, output };
+  }
+
   async execute(request: ToolRequest): Promise<unknown> {
     this.emergencyStop.assertRunning();
     const tool = this.tools.get(request.tool);
