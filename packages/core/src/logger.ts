@@ -16,7 +16,7 @@ export interface Logger {
 }
 
 export class JsonLogger implements Logger {
-  constructor(private readonly source: string, private readonly sink = console) {}
+  constructor(private readonly source: string, private readonly sink: Pick<Console, "debug" | "info" | "warn" | "error"> = console) {}
 
   private write(level: LogLevel, message: string, data?: Record<string, unknown>): void {
     const record: LogRecord = { level, message, timestamp: new Date().toISOString(), source: this.source, data };
