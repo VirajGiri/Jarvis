@@ -1,4 +1,6 @@
 import type { AgentTask, TaskPriority } from "@jarvis/contracts";
+import { mkdir, readFile, writeFile, rename } from "node:fs/promises";
+import path from "node:path";
 
 export interface TaskStore {
   save(task: AgentTask): Promise<void>;
@@ -28,33 +30,30 @@ export class InMemoryTaskStore implements TaskStore {
 }
 
 export class JsonFileTaskStore implements TaskStore {
-  private readonly fallback = new InMemoryTaskStore();
-
   constructor(private readonly filePath: string) {}
 
   private async read(): Promise<AgentTask[]> {
     try {
-      const fs = await import("node:fs/promises");
-      const raw = await fs.readFile(this.filePath, "utf8");
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed as AgentTask[] : [];
-    } catch {
-      return this.fallback.list();
+      const raw = await readFile(this.filePath, "utf8");
+      const parsed: unknown = JSON.parse(raw);
+      if (!Array.isArray(parsed)) throw new Error("TASK_STORE_INVALID_FORMAT");
+      return parsed as AgentTask[];
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+      throw error;
     }
   }
 
   private async write(tasks: AgentTask[]): Promise<void> {
-    const fs = await import("node:fs/promises");
-    const path = await import("node:path");
-    await fs.mkdir(path.dirname(this.filePath), { recursive: true });
-    await fs.writeFile(this.filePath, JSON.stringify(tasks, null, 2), "utf8");
+    await mkdir(path.dirname(this.filePath), { recursive: true });
+    const tempPath = this.filePath + ".tmp";
+    await writeFile(tempPath, JSON.stringify(tasks, null, 2), "utf8");
+    await rename(tempPath, this.filePath);
   }
 
   async save(task: AgentTask): Promise<void> {
     const tasks = await this.read();
-    const next = tasks.filter((item) => item.id !== task.id);
-    next.push(task);
-    await this.write(next);
+    await this.write([...tasks.filter((item) => item.id !== task.id), task]);
   }
 
   async remove(taskId: string): Promise<void> {
@@ -62,13 +61,8 @@ export class JsonFileTaskStore implements TaskStore {
     await this.write(tasks.filter((item) => item.id !== taskId));
   }
 
-  async list(): Promise<AgentTask[]> {
-    return this.read();
-  }
-
-  async clear(): Promise<void> {
-    await this.write([]);
-  }
+  async list(): Promise<AgentTask[]> { return this.read(); }
+  async clear(): Promise<void> { await this.write([]); }
 }
 
 export function createTask(
