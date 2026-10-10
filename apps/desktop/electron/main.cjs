@@ -7,8 +7,8 @@ const isDev = !app.isPackaged;
 let mainWindow;
 let eventWatcher;
 let eventOffset = 0;
-const runtimeStatePath = process.env.JARVIS_RUNTIME_STATUS_PATH || path.resolve(process.cwd(), ".jarvis/runtime-status.json");
-const runtimeEventsPath = process.env.JARVIS_RUNTIME_EVENTS_PATH || path.resolve(process.cwd(), ".jarvis/runtime-events.ndjson");
+const runtimeStatePath = process.env.JARVIS_RUNTIME_STATUS_PATH || path.resolve(process.cwd(), "../runtime/.jarvis/runtime-status.json");
+const runtimeEventsPath = process.env.JARVIS_RUNTIME_EVENTS_PATH || path.resolve(process.cwd(), "../runtime/.jarvis/runtime-events.ndjson");
 const fallbackState = { state: "STOPPED", activeTasks: 0, queuedTasks: 0, agents: [], updatedAt: new Date(0).toISOString() };
 
 async function readRuntimeState() {
