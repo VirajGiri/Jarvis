@@ -45,7 +45,7 @@ Active engineering queue for the jarvis-foundation branch.
 - [x] Live event stream
 - [x] Agent detail panel
 - [x] Task queue metrics panel
-- [ ] Permission panel
+- [x] Permission panel with explicit approve/deny IPC
 - [x] Detailed system telemetry panel
 
 ## Reliability
