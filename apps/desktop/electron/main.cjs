@@ -66,13 +66,7 @@ function createWindow() {
 }
 
 ipcMain.handle("jarvis:status", () => readRuntimeState());
-ipcMain.handle("jarvis:approvals:list", async () => {
-  try {
-    const raw = await fsp.readFile(path.resolve(process.cwd(), ".jarvis/approvals.json"), "utf8");
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((item) => item && item.status === "PENDING") : [];
-  } catch { return []; }
-});
+
 
 app.whenReady().then(() => {
   createWindow();
