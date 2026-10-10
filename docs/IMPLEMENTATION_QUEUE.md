@@ -30,7 +30,7 @@ Active engineering queue for the jarvis-foundation branch.
 ## Agents
 - [x] Base agent SDK
 - [x] System Agent
-- [ ] Research Agent
+- [x] Research Agent (offline source digest; no web search)
 - [ ] Coding Agent
 - [ ] Browser Agent
 - [ ] Files Agent
@@ -41,11 +41,12 @@ Active engineering queue for the jarvis-foundation branch.
 - [x] React command center
 - [x] Electron secure boundary
 - [x] Runtime status IPC
+- [x] Validated research submission IPC and runtime command bridge
 - [x] Live event stream
 - [x] Agent detail panel
 - [x] Task queue metrics panel
 - [ ] Permission panel
-- [ ] Detailed system telemetry panel
+- [x] Detailed system telemetry panel
 
 ## Reliability
 - [x] Unit-test foundation
